@@ -87,6 +87,82 @@ function displayMenu() {
     document.getElementById('total-paid').innerHTML = `💳 TOTAL PAID SO FAR: Rs.${deb_guin.total_paid}`;
 }
 
+// Mark payment (with auto-save)
+function markPayment() {
+    const teacher_idx = parseInt(prompt("Select teacher (1-7):")) - 1;
+    if (teacher_idx < 0 || teacher_idx >= NUM_TEACHERS) {
+        alert("Invalid teacher!");
+        return;
+    }
+    const months_to_pay = parseInt(prompt(`How many months for ${deb_guin.teachers[teacher_idx].name}:`));
+    if (months_to_pay <= 0) {
+        alert("Invalid number of months!");
+        return;
+    }
+    const amount = months_to_pay * deb_guin.teachers[teacher_idx].monthly_fee;
+    let new_month = deb_guin.teachers[teacher_idx].last_paid_month + months_to_pay;
+    let new_year = deb_guin.teachers[teacher_idx].last_paid_year;
+    while (new_month > 12) {
+        new_month -= 12;
+        new_year++;
+    }
+    // Record payment
+    if (deb_guin.teachers[teacher_idx].num_payments < MAX_PAYMENTS) {
+        deb_guin.teachers[teacher_idx].payments.push({
+            day: current_day,
+            month: current_month,
+            year: current_year,
+            amount: amount
+        });
+        deb_guin.teachers[teacher_idx].num_payments++;
+    }
+    deb_guin.teachers[teacher_idx].last_paid_day = current_day;
+    deb_guin.teachers[teacher_idx].last_paid_month = new_month;
+    deb_guin.teachers[teacher_idx].last_paid_year = new_year;
+    deb_guin.total_paid += amount;
+    alert(`Payment Recorded! Paid ${months_to_pay} months = Rs.${amount}. Now paid until ${getMonthName(new_month)} ${new_year}.`);
+    saveData();  // Auto-save after payment
+    displayMenu();
+}
+
+// Show dues
+function showDues() {
+    let html = "<h3>Pending Payments:</h3>";
+    let total_due = 0;
+    for (let i = 0; i < NUM_TEACHERS; i++) {
+        const due_months = monthsDue(deb_guin.teachers[i].last_paid_month, deb_guin.teachers[i].last_paid_year);
+        if (due_months > 0) {
+            const due_amount = calculateTotalDue(i);
+            const late_fee = (i === YUVO_INDEX && current_day >= deb_guin.teachers[i].late_fee_days) ? calculateYuvoLateFee(due_months) : 0;
+            html += `${deb_guin.teachers[i].name} (${deb_guin.teachers[i].subject}): ${due_months} months + Late Rs.${late_fee} = Rs.${due_amount}<br>`;
+            total_due += due_amount;
+        }
+    }
+    if (total_due === 0) html += "✅ No pending payments!<br>";
+    html += `<br>💰 TOTAL DUE: Rs.${total_due}<br>💳 Total Paid so far: Rs.${deb_guin.total_paid}`;
+    document.getElementById('output').innerHTML = html;
+}
+
+// Show status
+function showStatus() {
+    let html = "<h3>Current Status:</h3>";
+    for (let i = 0; i < NUM_TEACHERS; i++) {
+        const due_months = monthsDue(deb_guin.teachers[i].last_paid_month, deb_guin.teachers[i].last_paid_year);
+        html += `${deb_guin.teachers[i].name} (${deb_guin.teachers[i].subject}) - Rs.${deb_guin.teachers[i].monthly_fee}/month:<br>`;
+        if (deb_guin.teachers[i].last_paid_month > 0) {
+            const dayStr =        if (deb_guin.teachers[i].last_paid_month > 0) {
+            const dayStr = deb_guin.teachers[i].last_paid_day > 0 ? `${deb_guin.teachers[i].last_paid_day} ` : "";
+            html += `   Last Paid: ${dayStr}${getMonthName(deb_guin.teachers[i].last_paid_month)} ${deb_guin.teachers[i].last_paid_year} | Due: ${due_months} months Rs.${total_due}<br>`;
+        } else {
+            html += `   Not yet paid | Due: ${due_months} months Rs.${total_due}<br>`;
+        }
+        grand_total += total_due;
+    }
+    document.getElementById('teachers-list').innerHTML = html;
+    document.getElementById('grand-total').innerHTML = `💰 GRAND TOTAL DUE TODAY: Rs.${grand_total}`;
+    document.getElementById('total-paid').innerHTML = `💳 TOTAL PAID SO FAR: Rs.${deb_guin.total_paid}`;
+}
+
 // Register service worker
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js')
@@ -128,6 +204,7 @@ function markPayment() {
     deb_guin.teachers[teacher_idx].last_paid_year = new_year;
     deb_guin.total_paid += amount;
     alert(`Payment Recorded! Paid ${months_to_pay} months = Rs.${amount}. Now paid until ${getMonthName(new_month)} ${new_year}.`);
+    saveData();
     displayMenu();
 }
 
