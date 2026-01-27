@@ -1,100 +1,151 @@
+/* Global Styles */
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: linear-gradient(to bottom, #4a90e2, #5c6bc0);
-  min-height: 100vh;
-  color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 0;
+    padding: 20px;
+    color: #333;
+    line-height: 1.6;
 }
 
 .container {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.92);
-  min-height: 100vh;
-  box-sizing: border-box;
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
+/* Headings */
 h1 {
-  text-align: center;
-  color: #ffffff;
-  margin: 20px 0 30px;
-  font-size: 2.1rem;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    text-align: center;
+    color: #007bff;
+    margin-bottom: 20px;
+    font-size: 2em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.date-box {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 16px;
-  margin: 0 auto 30px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  font-size: 1.15rem;
-  font-weight: 500;
+h2, h3 {
+    color: #495057;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-weight: 600;
 }
 
-.calendar-icon {
-  font-size: 2rem;
+/* Date Display */
+#date-display {
+    text-align: center;
+    font-size: 1.2em;
+    color: #6c757d;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
 }
 
-h2 {
-  color: #444;
-  margin: 30px 0 12px;
-  font-size: 1.4rem;
-  text-align: center;
+/* Menu Section */
+#menu {
+    margin-bottom: 30px;
 }
 
 #teachers-list {
-  background: white;
-  border-radius: 10px;
-  padding: 20px;
-  min-height: 180px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  margin-bottom: 20px;
-  line-height: 1.7;
-}
-
-#teachers-list strong {
-  color: #0066cc;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    margin-bottom: 15px;
+    font-size: 0.95em;
 }
 
 #grand-total, #total-paid {
-  text-align: center;
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin: 16px 0;
-  color: #d32f2f;
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: bold;
+    margin: 10px 0;
+    padding: 10px;
+    background: #e9ecef;
+    border-radius: 8px;
+    border: 1px solid #adb5bd;
 }
 
-.menu-buttons button {
-  display: block;
-  width: 100%;
-  margin: 12px 0;
-  padding: 16px;
-  font-size: 1.15rem;
-  font-weight: 500;
-  color: white;
-  background: #1976d2;
-  border: none;
-  border-radius: 10px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-  cursor: pointer;
+/* Buttons */
+button {
+    display: inline-block;
+    margin: 5px;
+    padding: 12px 20px;
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
 }
 
-.menu-buttons button:hover {
-  background: #1565c0;
+button:hover {
+    background: linear-gradient(45deg, #0056b3, #004085);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 123, 255, 0.4);
 }
 
+button:active {
+    transform: translateY(0);
+}
+
+/* Output Section */
 #output {
-  margin-top: 30px;
-  padding: 20px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  line-height: 1.6;
+    margin-top: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    min-height: 100px;
+    font-size: 0.95em;
+    overflow-y: auto;
+}
+
+#output h3 {
+    color: #007bff;
+    margin-top: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+    
+    h1 {
+        font-size: 1.5em;
+    }
+    
+    button {
+        display: block;
+        width: 100%;
+        margin: 5px 0;
+    }
+    
+    #teachers-list {
+        font-size: 0.9em;
+    }
+    
+    #grand-total, #total-paid {
+        font-size: 1em;
+    }
+}
+
+/* Additional Styles for Better Readability */
+strong {
+    color: #007bff;
+}
+
+br {
+    display: block;
+    margin: 5px 0;
 }
