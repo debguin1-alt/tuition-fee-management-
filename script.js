@@ -152,3 +152,129 @@ function showDues() {
 }
 
 // Show status
+function showStatus() {
+    let html = "<h3>Current Status:</h3>";
+    for (let i = 0; i < NUM_TEACHERS; i++) {
+        const due_months = monthsDue(deb_guin.teachers[i].last_paid_month, deb_guin.teachers[i].last_paid_year);
+        html += `${deb_guin.teachers[i].name} (${deb_guin.teachers[i].subject}) - Rs.${deb_guin.teachers[i].monthly_fee}/month:<br>`;
+        if (deb_guin.teachers[i].last_paid_month > 0) {
+            const dayStr = deb_guin.teachers[i].last_paid_day > 0 ? `${deb_guin.teachers[i].last_paid_day} ` : "";
+            html += `   ✅ Last Paid: ${dayStr}${getMonthName(deb_guin.teachers[i].last_paid_month)} ${deb_guin.teachers[i].last_paid_year}<br>`;
+        } else {
+            html += "   ⚠️ Never paid<br>";
+        }
+        if (due_months > 0) {
+            const total_due = calculateTotalDue(i);
+            const late_fee = (i === YUVO_INDEX && current_day >= deb_guin.teachers[i].late_fee_days) ? calculateYuvoLateFee(due_months) : 0;
+            html += `   ❌ Due: ${due_months} months + Late Rs.${late_fee} = Rs.${total_due}<br>`;
+        } else {
+            html += "   ✅ Up to date!<br>";
+        }
+        html += "<br>";
+    }
+    html += `💳 Total Amount Paid: Rs.${deb_guin.total_paid}`;
+    document.getElementById('output').innerHTML = html;
+}
+
+// Show payment history
+function showHistory() {
+    let html = "<h3>Payment History:</h3>";
+    for (let i = 0; i < NUM_TEACHERS; i++) {
+        html += `<strong>${deb_guin.teachers[i].name}:</strong><br>`;
+        if (deb_guin.teachers[i].num_payments === 0) {
+            html += "   No payments recorded.<br>";
+        } else {
+            deb_guin.teachers[i].payments.forEach(p => {
+                html += `   ${p.day} ${getMonthName(p.month)} ${p.year}: Rs.${p.amount}<br>`;
+            });
+        }
+        html += "<br>";
+    }
+    document.getElementById('output').innerHTML = html;
+}
+
+// Export data to file
+function exportData() {
+  const dataStr = JSON.stringify(deb_guin, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `fee-manager-data-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  alert("Data exported to file!");
+}
+
+// Import data from file
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          deb_guin = importedData;
+          saveData();
+          displayMenu();
+          alert("Data imported!");
+        } catch (err) {
+          alert("Invalid file! " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+  input.click();
+}
+
+// Save data to localStorage (with auto-export)
+function saveData() {
+  try {
+    localStorage.setItem('deb_guin_data', JSON.stringify(deb_guin));
+    exportData();  // Auto-export to file
+    alert("Data saved!");
+  } catch (e) {
+    alert("Save failed! localStorage may be full. " + e.message);
+  }
+}
+
+// Load data from localStorage
+function loadData() {
+  try {
+    const data = localStorage.getItem('deb_guin_data');
+    if (data) {
+      deb_guin = JSON.parse(data);
+    } else {
+      initDefaultData();
+    }
+    displayMenu();
+  } catch (e) {
+    alert("Load failed! Using default data. " + e.message);
+    initDefaultData();
+    displayMenu();
+  }
+}
+
+// Exit app
+function exitApp() {
+    if (confirm("Save and exit?")) {
+        saveData();
+        alert("Thank you!");
+    }
+}
+
+// Initialize
+loadData();
+updateSystemDate();
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js')
+    .then(() => console.log('Service Worker registered'))
+    .catch((error) => console.log('Service Worker registration failed:', error));
+        }
