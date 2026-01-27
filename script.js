@@ -214,46 +214,60 @@ function openDB() {
 }
 
 // Save data to local IndexedDB
+// Export data to a downloadable JSON file (file-based save)
+function exportData() {
+  const dataStr = JSON.stringify(deb_guin, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `fee-manager-data-${new Date().toISOString().split('T')[0]}.json`;  // Dated filename for uniqueness
+  a.click();
+  URL.revokeObjectURL(url);
+  alert("Data exported to file! Save it on your device.");
+}
+
+// Import data from a user-selected JSON file (file-based load)
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          deb_guin = importedData;
+          saveData();  // Optionally save to IndexedDB for quick access
+          displayMenu();
+          alert("Data imported from file!");
+        } catch (err) {
+          alert("Invalid file! " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+  input.click();
+}
+
+// Save data (with auto-export to file)
 async function saveData() {
   try {
+    // Save to IndexedDB for quick access (optional)
     const db = await openDB();
     const transaction = db.transaction([STORE_NAME], 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
     store.put(deb_guin, 'appData');
-    console.log("Data saved to local storage!");
+    
+    // Auto-export to file (file-based save)
+    exportData();  // Calls export function
+    console.log("Data saved and exported to file!");
   } catch (e) {
-    alert("Save failed! Data may not persist. " + e.message);
+    alert("Save failed! " + e.message);
     console.error("Save error:", e);
-  }
-}
-
-// Load data from local IndexedDB
-async function loadData() {
-  try {
-    const db = await openDB();
-    const transaction = db.transaction([STORE_NAME], 'readonly');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.get('appData');
-    request.onsuccess = () => {
-      if (request.result) {
-        deb_guin = request.result;
-        console.log("Data loaded from local storage!");
-      } else {
-        initDefaultData();
-        console.log("No saved data found. Using defaults.");
-      }
-      displayMenu();  // Display after loading
-    };
-    request.onerror = () => {
-      console.error("Load error:", request.error);
-      initDefaultData();
-      displayMenu();
-    };
-  } catch (e) {
-    alert("Load failed! Using default data. " + e.message);
-    console.error("Load error:", e);
-    initDefaultData();
-    displayMenu();
   }
 }
 // Exit app
