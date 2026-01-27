@@ -280,7 +280,7 @@ function exitApp() {
 
 // Initialize
 (async () => {
-  await loadData();
+  await importData();
   updateSystemDate();
   displayMenu();
   // Register service worker
