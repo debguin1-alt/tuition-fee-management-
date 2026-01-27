@@ -194,34 +194,68 @@ function showHistory() {
 }
 
 // Save data to localStorage (with error handling)
-function saveData() {
-    try {
-        localStorage.setItem('deb_guin_data', JSON.stringify(deb_guin));
-        alert("Data saved successfully!");
-    } catch (e) {
-        alert("Save failed! localStorage may be full or disabled. Error: " + e.message);
-        console.error("Save error:", e);
-    }
+// IndexedDB setup (local device storage)
+const DB_NAME = 'FeeManagerDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'data';
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
 }
 
-// Load data from localStorage (with error handling)
-function loadData() {
-    try {
-        const data = localStorage.getItem('deb_guin_data');
-        if (data) {
-            deb_guin = JSON.parse(data);
-            console.log("Data loaded successfully!");
-        } else {
-            initDefaultData();
-            console.log("No saved data found. Using defaults.");
-        }
-    } catch (e) {
-        alert("Load failed! Using default data. Error: " + e.message);
-        console.error("Load error:", e);
+// Save data to local IndexedDB
+async function saveData() {
+  try {
+    const db = await openDB();
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    store.put(deb_guin, 'appData');
+    console.log("Data saved to local storage!");
+  } catch (e) {
+    alert("Save failed! Data may not persist. " + e.message);
+    console.error("Save error:", e);
+  }
+}
+
+// Load data from local IndexedDB
+async function loadData() {
+  try {
+    const db = await openDB();
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get('appData');
+    request.onsuccess = () => {
+      if (request.result) {
+        deb_guin = request.result;
+        console.log("Data loaded from local storage!");
+      } else {
         initDefaultData();
-    }
+        console.log("No saved data found. Using defaults.");
+      }
+      displayMenu();  // Display after loading
+    };
+    request.onerror = () => {
+      console.error("Load error:", request.error);
+      initDefaultData();
+      displayMenu();
+    };
+  } catch (e) {
+    alert("Load failed! Using default data. " + e.message);
+    console.error("Load error:", e);
+    initDefaultData();
+    displayMenu();
+  }
 }
-
 // Exit app
 function exitApp() {
     if (confirm("Save and exit?")) {
@@ -231,13 +265,14 @@ function exitApp() {
 }
 
 // Initialize
-loadData();
-updateSystemDate();
-displayMenu();
-
-// Register service worker (optional, with error handling)
-if ('serviceWorker' in navigator) {
+(async () => {
+  await loadData();
+  updateSystemDate();
+  displayMenu();
+  // Register service worker
+  if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
-        .then(() => console.log('Service Worker registered'))
-        .catch((error) => console.log('Service Worker registration failed:', error));
-}
+      .then(() => console.log('Service Worker registered'))
+      .catch((error) => console.log('Service Worker registration failed:', error));
+  }
+})();
