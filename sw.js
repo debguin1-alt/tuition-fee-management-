@@ -1,4 +1,4 @@
-/const CACHE_NAME = 'fee-manager-v1';
+/const CACHE_NAME = 'fee-manager-v5';
 const urlsToCache = [
   '/',
   '/index.html',
