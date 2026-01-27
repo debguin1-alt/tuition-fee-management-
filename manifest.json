@@ -2,7 +2,7 @@
   "name": "Deb Guin's Tuition Fee Manager",
   "short_name": "Fee Manager",
   "description": "Manage tuition fees for Deb Guin with payment tracking and dues calculation.",
-  "start_url": "/tution-fee-management-/index.html",
+  "start_url": "/tuition-fee-management-/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#007bff",
