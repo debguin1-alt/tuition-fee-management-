@@ -9,10 +9,7 @@ let deb_guin = {
 };
 
 let current_day, current_month, current_year;
-// Sound functions (short beeps using data URIs)
-function playClickSound() {
-    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH8N2QQAoUXrTp66hVFApGn+DyvmQdBzaO1fLNfCsFJHfH
-                            }
+
 // Initialize default data
 function initDefaultData() {
     deb_guin.teachers = [
@@ -92,7 +89,6 @@ function displayMenu() {
 
 // Mark payment (with auto-save)
 function markPayment() {
-    playClickSound()
     const teacher_idx = parseInt(prompt("Select teacher (1-7):")) - 1;
     if (teacher_idx < 0 || teacher_idx >= NUM_TEACHERS) {
         alert("Invalid teacher!");
@@ -131,7 +127,6 @@ function markPayment() {
 
 // Show dues
 function showDues() {
-    playClickSound()
     let html = "<h3>Pending Payments:</h3>";
     let total_due = 0;
     for (let i = 0; i < NUM_TEACHERS; i++) {
@@ -150,7 +145,6 @@ function showDues() {
 
 // Show status
 function showStatus() {
-    playClickSound()
     let html = "<h3>Current Status:</h3>";
     for (let i = 0; i < NUM_TEACHERS; i++) {
         const due_months = monthsDue(deb_guin.teachers[i].last_paid_month, deb_guin.teachers[i].last_paid_year);
@@ -176,7 +170,6 @@ function showStatus() {
 
 // Show payment history
 function showHistory() {
-    playClickSound()
     let html = "<h3>Payment History:</h3>";
     for (let i = 0; i < NUM_TEACHERS; i++) {
         html += `<strong>${deb_guin.teachers[i].name}:</strong><br>`;
@@ -194,7 +187,6 @@ function showHistory() {
 
 // Save data to localStorage (with error handling)
 function saveData() {
-    playClickSound()
     try {
         localStorage.setItem('deb_guin_data', JSON.stringify(deb_guin));
         alert("Data saved successfully!");
@@ -224,7 +216,6 @@ function loadData() {
 
 // Exit app
 function exitApp() {
-    playClickSound()
     if (confirm("Save and exit?")) {
         saveData();
         alert("Thank you Deb Guin!");
