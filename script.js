@@ -10,6 +10,25 @@ let deb_guin = {
 
 let current_day, current_month, current_year;
 
+// IndexedDB setup
+const DB_NAME = 'FeeManagerDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'data';
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
 // Initialize default data
 function initDefaultData() {
     deb_guin.teachers = [
@@ -73,7 +92,7 @@ function displayMenu() {
     for (let i = 0; i < NUM_TEACHERS; i++) {
         const due_months = monthsDue(deb_guin.teachers[i].last_paid_month, deb_guin.teachers[i].last_paid_year);
         const total_due = calculateTotalDue(i);
-        html += `${i+1}. ${deb_guin.teachers[i].name} (${deb_guin.teachers[i].subject}) Rs.${deb_guin.teachers[i].monthly_fee}/month<br>`;
+        html += `${i+1}. <strong>${deb_guin.teachers[i].name}</strong> (${deb_guin.teachers[i].subject}) Rs.${deb_guin.teachers[i].monthly_fee}/month<br>`;
         if (deb_guin.teachers[i].last_paid_month > 0) {
             const dayStr = deb_guin.teachers[i].last_paid_day > 0 ? `${deb_guin.teachers[i].last_paid_day} ` : "";
             html += `   Last Paid: ${dayStr}${getMonthName(deb_guin.teachers[i].last_paid_month)} ${deb_guin.teachers[i].last_paid_year} | Due: ${due_months} months Rs.${total_due}<br>`;
@@ -87,13 +106,12 @@ function displayMenu() {
     document.getElementById('total-paid').innerHTML = `💳 TOTAL PAID SO FAR: Rs.${deb_guin.total_paid}`;
 }
 
-
-// Mark payment (with auto-save and cancel support)
+// Mark payment (with auto-save and cancel)
 function markPayment() {
     const teacher_idx = parseInt(prompt("Select teacher (1-7):")) - 1;
     if (teacher_idx === null || teacher_idx === undefined) {
         alert("Payment canceled.");
-        return; // Cancel if user clicks cancel
+        return;
     }
     if (teacher_idx < 0 || teacher_idx >= NUM_TEACHERS) {
         alert("Invalid teacher!");
@@ -102,7 +120,7 @@ function markPayment() {
     const months_to_pay = parseInt(prompt(`How many months for ${deb_guin.teachers[teacher_idx].name}:`));
     if (months_to_pay === null || months_to_pay === undefined) {
         alert("Payment canceled.");
-        return; // Cancel if user clicks cancel
+        return;
     }
     if (months_to_pay <= 0) {
         alert("Invalid number of months!");
@@ -130,9 +148,10 @@ function markPayment() {
     deb_guin.teachers[teacher_idx].last_paid_year = new_year;
     deb_guin.total_paid += amount;
     alert(`Payment Recorded! Paid ${months_to_pay} months = Rs.${amount}. Now paid until ${getMonthName(new_month)} ${new_year}.`);
-    saveData();  // Auto-save after payment
+    saveData();  // Auto-save
     displayMenu();
 }
+
 // Show dues
 function showDues() {
     let html = "<h3>Pending Payments:</h3>";
@@ -193,35 +212,157 @@ function showHistory() {
     document.getElementById('output').innerHTML = html;
 }
 
-// Save data to localStorage (with error handling)
-function saveData() {
-    try {
-        localStorage.setItem('deb_guin_data', JSON.stringify(deb_guin));
-        alert("Data saved successfully!");
-    } catch (e) {
-        alert("Save failed! localStorage may be full or disabled. Error: " + e.message);
-        console.error("Save error:", e);
-    }
+// Export data to file
+function exportData() {
+  const dataStr = JSON.stringify(deb_guin, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `fee-manager-data-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  alert("Data exported to file!");
 }
 
-// Load data from localStorage (with error handling)
-function loadData() {
-    try {
-        const data = localStorage.getItem('deb_guin_data');
-        if (data) {
-            deb_guin = JSON.parse(data);
-            console.log("Data loaded successfully!");
-        } else {
-            initDefaultData();
-            console.log("No saved data found. Using defaults.");
+// Import data from file
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          deb_guin = importedData;
+          saveData();
+          displayMenu();
+          alert("Data imported!");
+        } catch (err) {
+          alert("Invalid file! " + err.message);
         }
-    } catch (e) {
-        alert("Load failed! Using default data. Error: " + e.message);
-        console.error("Load error:", e);
+      };
+      reader.readAsText(file);
+    }
+  };
+  input.click();
+}
+
+// Save data (with auto-export)
+async function saveData() {
+  try {
+    const db = await openDB();
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    store.put(deb_guin, 'appData');
+    exportData();  // Auto-export
+    console.log("Data saved!");
+  } catch (e) {
+    alert("Save failed! " + e.message);
+  }
+}
+
+// Load data
+async function loadData() {
+  try {
+    const db = await openDB();
+    const transaction = db.transaction([STORE_NAME], 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get('appData');
+    request.onsuccess = () => {
+      if (request.result) {
+        deb_guin = request.result;
+      } else {
         initDefaultData();
+      }
+      displayMenu();
+    };
+    request.onerror = () => {
+      initDefaultData();
+      displayMenu();
+    };
+  } catch (e) {
+    initDefaultData();
+    displayMenu();
+  }
+}
+
+// Exit app
+function exitApp() {
+    if (confirm("Save and exit?")) {
+        saveData();
+        alert("Thank you!");
     }
 }
 
+// Initialize
+(async () => {
+  await loadData();
+  updateSystemDate();
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('Service Worker registered'))
+      .catch((error) => console.log('Service Worker registration failed:', error));
+  }
+})();rtData() {
+  const dataStr = JSON.stringify(deb_guin, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `fee-manager-data-${new Date().toISOString().split('T')[0]}.json`;  // Dated filename for uniqueness
+  a.click();
+  URL.revokeObjectURL(url);
+  alert("Data exported to file! Save it on your device.");
+}
+
+// Import data from a user-selected JSON file (file-based load)
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          deb_guin = importedData;
+          saveData();  // Optionally save to IndexedDB for quick access
+          displayMenu();
+          alert("Data imported from file!");
+        } catch (err) {
+          alert("Invalid file! " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+  input.click();
+}
+
+// Save data (with auto-export to file)
+async function saveData() {
+  try {
+    // Save to IndexedDB for quick access (optional)
+    const db = await openDB();
+    const transaction = db.transaction([STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+    store.put(deb_guin, 'appData');
+    
+    // Auto-export to file (file-based save)
+    exportData();  // Calls export function
+    console.log("Data saved and exported to file!");
+  } catch (e) {
+    alert("Save failed! " + e.message);
+    console.error("Save error:", e);
+  }
+}
 // Exit app
 function exitApp() {
     if (confirm("Save and exit?")) {
@@ -231,13 +372,14 @@ function exitApp() {
 }
 
 // Initialize
-loadData();
-updateSystemDate();
-displayMenu();
-
-// Register service worker (optional, with error handling)
-if ('serviceWorker' in navigator) {
+(async () => {
+  await importData();
+  updateSystemDate();
+  displayMenu();
+  // Register service worker
+  if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
-        .then(() => console.log('Service Worker registered'))
-        .catch((error) => console.log('Service Worker registration failed:', error));
-        }
+      .then(() => console.log('Service Worker registered'))
+      .catch((error) => console.log('Service Worker registration failed:', error));
+  }
+})();
