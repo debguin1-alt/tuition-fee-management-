@@ -1,187 +1,298 @@
 const NUM_TEACHERS = 7;
 const YUVO_INDEX = 4;
-const DB_NAME = 'FeeManagerDB';
-const STORE_NAME = 'data';
+const MAX_PAYMENTS = 100;
 
-let deb_guin = { name: "Deb Guin", total_paid: 0, teachers: [] };
+let deb_guin = {
+    name: "Deb Guin",
+    total_paid: 0,
+    teachers: []
+};
+
 let current_day, current_month, current_year;
 
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = e => {
-      const db = e.target.result;
-      db.createObjectStore(STORE_NAME);
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
+// Initialize default data
 function initDefaultData() {
-  deb_guin.teachers = [
-    { name: "Snigdhadeep Chakraborty", subject: "Math", monthly_fee: 500, last_paid_month: 7, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [] },
-    { name: "Prasun Banerjee", subject: "Chemistry", monthly_fee: 500, last_paid_month: 7, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [] },
-    { name: "Sumit Sir", subject: "English", monthly_fee: 400, last_paid_month: 7, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [] },
-    { name: "Debabrata Sir", subject: "Bengali", monthly_fee: 300, last_paid_month: 6, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [] },
-    { name: "Yuvo Comp. Centre", subject: "DDTA", monthly_fee: 700, last_paid_month: 12, last_paid_year: 2025, late_fee_days: 20, late_fee_amount: 2, payments: [] },
-    { name: "Mridul Seal", subject: "COMA", monthly_fee: 500, last_paid_month: 8, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [] },
-    { name: "Arpan Sir", subject: "Physics", monthly_fee: 500, last_paid_month: 8, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [] }
-  ];
-  deb_guin.total_paid = 0;
+    deb_guin.teachers = [
+        { name: "Snigdhadeep Chakraborty", subject: "Math", monthly_fee: 500, last_paid_day: 0, last_paid_month: 7, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [], num_payments: 0 },
+        { name: "Prasun Banerjee", subject: "Chemistry", monthly_fee: 500, last_paid_day: 0, last_paid_month: 7, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [], num_payments: 0 },
+        { name: "Sumit Sir", subject: "English", monthly_fee: 400, last_paid_day: 0, last_paid_month: 7, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [], num_payments: 0 },
+        { name: "Debabrata Sir", subject: "Bengali", monthly_fee: 300, last_paid_day: 0, last_paid_month: 6, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [], num_payments: 0 },
+        { name: "Yuvo Comp. Centre", subject: "DDTA", monthly_fee: 700, last_paid_day: 0, last_paid_month: 12, last_paid_year: 2025, late_fee_days: 20, late_fee_amount: 2, payments: [], num_payments: 0 },
+        { name: "Mridul Seal", subject: "COMA", monthly_fee: 500, last_paid_day: 0, last_paid_month: 8, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [], num_payments: 0 },
+        { name: "Arpan Sir", subject: "Physics", monthly_fee: 500, last_paid_day: 0, last_paid_month: 8, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [], num_payments: 0 }
+    ];
 }
 
+// Update system date
 function updateSystemDate() {
-  const now = new Date();
-  current_day = now.getDate();
-  current_month = now.getMonth() + 1;
-  current_year = now.getFullYear();
-  document.getElementById('date-display').textContent = `TODAY: ${getMonthName(current_month)} ${current_year}, Day ${current_day}`;
+    const now = new Date();
+    current_day = now.getDate();
+    current_month = now.getMonth() + 1;
+    current_year = now.getFullYear();
+    document.getElementById('date-display').innerHTML = `📅 TODAY: ${getMonthName(current_month)} ${current_year}, Day ${current_day}`;
 }
 
-function getMonthName(m) {
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  return months[m-1] || "???";
+// Get month name
+function getMonthName(month) {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return months[month - 1] || "???";
 }
 
-function monthsDue(lastM, lastY) {
-  if (!lastM || !lastY) return 0;
-  if (lastY < current_year) return (12 - lastM) + 12 * (current_year - lastY - 1) + current_month;
-  if (lastY === current_year) return current_month - lastM;
-  return 0;
-}
-
-function calculateYuvoLateFee(dueMonths) {
-  if (current_day < deb_guin.teachers[YUVO_INDEX].late_fee_days) return 0;
-  return (current_day - deb_guin.teachers[YUVO_INDEX].late_fee_days) * deb_guin.teachers[YUVO_INDEX].late_fee_amount;
-}
-
-function calculateTotalDue(idx) {
-  const dueMonths = monthsDue(deb_guin.teachers[idx].last_paid_month, deb_guin.teachers[idx].last_paid_year);
-  let due = dueMonths * deb_guin.teachers[idx].monthly_fee;
-  if (idx === YUVO_INDEX && dueMonths > 0 && current_day >= deb_guin.teachers[idx].late_fee_days) {
-    due += calculateYuvoLateFee(dueMonths);
-  }
-  return due;
-}
-
-function displayMenu() {
-  let html = "", grand = 0;
-  if (!deb_guin.teachers?.length) {
-    html = "<strong style='color:red'>No data loaded. Using defaults.</strong><br><br>";
-    initDefaultData();
-  }
-  deb_guin.teachers.forEach((t, i) => {
-    const dueM = monthsDue(t.last_paid_month, t.last_paid_year);
-    const due = calculateTotalDue(i);
-    html += `<strong>${i+1}. ${t.name}</strong> (${t.subject}) Rs.${t.monthly_fee}/mo<br>`;
-    html += t.last_paid_month ? `Last Paid: ${getMonthName(t.last_paid_month)} ${t.last_paid_year} | Due: ${dueM} mo Rs.${due}<br>` : `Not paid | Due: ${dueM} mo Rs.${due}<br>`;
-    grand += due;
-  });
-  document.getElementById('teachers-list').innerHTML = html;
-  document.getElementById('grand-total').innerHTML = `GRAND TOTAL DUE: Rs.${grand}`;
-  document.getElementById('total-paid').innerHTML = `TOTAL PAID: Rs.${deb_guin.total_paid}`;
-}
-
-async function markPayment() {
-  const idx = parseInt(prompt("Teacher (1-7):")) - 1;
-  if (isNaN(idx) || idx < 0 || idx >= NUM_TEACHERS) return alert("Invalid");
-  const months = parseInt(prompt(`Months for ${deb_guin.teachers[idx].name}:`));
-  if (isNaN(months) || months <= 0) return alert("Invalid");
-
-  const amount = months * deb_guin.teachers[idx].monthly_fee;
-  let newM = (deb_guin.teachers[idx].last_paid_month || current_month) + months;
-  let newY = deb_guin.teachers[idx].last_paid_year || current_year;
-  while (newM > 12) { newM -= 12; newY++; }
-
-  deb_guin.teachers[idx].last_paid_month = newM;
-  deb_guin.teachers[idx].last_paid_year = newY;
-  deb_guin.total_paid += amount;
-
-  // Add to history
-  deb_guin.teachers[idx].payments.push({
-    day: current_day,
-    month: current_month,
-    year: current_year,
-    amount
-  });
-
-  alert(`Paid ${months} mo = Rs.${amount}. Now paid until ${getMonthName(newM)} ${newY}`);
-  await saveData();
-  displayMenu();
-}
-
-function showDues() {
-  let html = "<h3>Pending Dues</h3>", total = 0;
-  deb_guin.teachers.forEach((t, i) => {
-    const dm = monthsDue(t.last_paid_month, t.last_paid_year);
-    if (dm > 0) {
-      const due = calculateTotalDue(i);
-      const late = (i === YUVO_INDEX) ? calculateYuvoLateFee(dm) : 0;
-      html += `${t.name} (${t.subject}): ${dm} mo + Late Rs.${late} = Rs.${due}<br>`;
-      total += due;
+// Calculate months due
+function monthsDue(last_paid_month, last_paid_year) {
+    if (last_paid_year === 0 && last_paid_month === 0) return 0;
+    if (last_paid_year < current_year) {
+        return (12 - last_paid_month) + 12 * (current_year - last_paid_year - 1) + current_month;
+    } else if (last_paid_year === current_year) {
+        return current_month - last_paid_month;
     }
-  });
-  html += total ? `<br><strong>TOTAL DUE: Rs.${total}</strong>` : "No dues!";
-  document.getElementById('output').innerHTML = html;
+    return 0;
 }
 
+// Calculate Yuvo late fee
+function calculateYuvoLateFee(due_months) {
+    if (current_day < deb_guin.teachers[YUVO_INDEX].late_fee_days) return 0;
+    const late_days = current_day - deb_guin.teachers[YUVO_INDEX].late_fee_days;
+    return late_days * deb_guin.teachers[YUVO_INDEX].late_fee_amount;
+}
+
+// Calculate total due
+function calculateTotalDue(teacher_idx) {
+    const due_months = monthsDue(deb_guin.teachers[teacher_idx].last_paid_month, deb_guin.teachers[teacher_idx].last_paid_year);
+    let total_due = due_months * deb_guin.teachers[teacher_idx].monthly_fee;
+    if (teacher_idx === YUVO_INDEX && due_months > 0 && current_day >= deb_guin.teachers[teacher_idx].late_fee_days) {
+        total_due += calculateYuvoLateFee(due_months);
+    }
+    return total_due;
+}
+
+// Display menu
+function displayMenu() {
+    let html = "";
+    let grand_total = 0;
+    for (let i = 0; i < NUM_TEACHERS; i++) {
+        const due_months = monthsDue(deb_guin.teachers[i].last_paid_month, deb_guin.teachers[i].last_paid_year);
+        const total_due = calculateTotalDue(i);
+        html += `${i+1}. ${deb_guin.teachers[i].name} (${deb_guin.teachers[i].subject}) Rs.${deb_guin.teachers[i].monthly_fee}/month<br>`;
+        if (deb_guin.teachers[i].last_paid_month > 0) {
+            const dayStr = deb_guin.teachers[i].last_paid_day > 0 ? `${deb_guin.teachers[i].last_paid_day} ` : "";
+            html += `   Last Paid: ${dayStr}${getMonthName(deb_guin.teachers[i].last_paid_month)} ${deb_guin.teachers[i].last_paid_year} | Due: ${due_months} months Rs.${total_due}<br>`;
+        } else {
+            html += `   Not yet paid | Due: ${due_months} months Rs.${total_due}<br>`;
+        }
+        grand_total += total_due;
+    }
+    document.getElementById('teachers-list').innerHTML = html;
+    document.getElementById('grand-total').innerHTML = `💰 GRAND TOTAL DUE TODAY: Rs.${grand_total}`;
+    document.getElementById('total-paid').innerHTML = `💳 TOTAL PAID SO FAR: Rs.${deb_guin.total_paid}`;
+}
+
+// Mark payment (with auto-save)
+function markPayment() {
+    const teacher_idx = parseInt(prompt("Select teacher (1-7):")) - 1;
+    if (teacher_idx < 0 || teacher_idx >= NUM_TEACHERS) {
+        alert("Invalid teacher!");
+        return;
+    }
+    const months_to_pay = parseInt(prompt(`How many months for ${deb_guin.teachers[teacher_idx].name}:`));
+    if (months_to_pay <= 0) {
+        alert("Invalid number of months!");
+        return;
+    }
+    const amount = months_to_pay * deb_guin.teachers[teacher_idx].monthly_fee;
+    let new_month = deb_guin.teachers[teacher_idx].last_paid_month + months_to_pay;
+    let new_year = deb_guin.teachers[teacher_idx].last_paid_year;
+    while (new_month > 12) {
+        new_month -= 12;
+        new_year++;
+    }
+    // Record payment
+    if (deb_guin.teachers[teacher_idx].num_payments < MAX_PAYMENTS) {
+        deb_guin.teachers[teacher_idx].payments.push({
+            day: current_day,
+            month: current_month,
+            year: current_year,
+            amount: amount
+        });
+        deb_guin.teachers[teacher_idx].num_payments++;
+    }
+    deb_guin.teachers[teacher_idx].last_paid_day = current_day;
+    deb_guin.teachers[teacher_idx].last_paid_month = new_month;
+    deb_guin.teachers[teacher_idx].last_paid_year = new_year;
+    deb_guin.total_paid += amount;
+    alert(`Payment Recorded! Paid ${months_to_pay} months = Rs.${amount}. Now paid until ${getMonthName(new_month)} ${new_year}.`);
+    saveData();  // Auto-save after payment
+    displayMenu();
+}
+
+// Show dues
+function showDues() {
+    let html = "<h3>Pending Payments:</h3>";
+    let total_due = 0;
+    for (let i = 0; i < NUM_TEACHERS; i++) {
+        const due_months = monthsDue(deb_guin.teachers[i].last_paid_month, deb_guin.teachers[i].last_paid_year);
+        if (due_months > 0) {
+            const due_amount = calculateTotalDue(i);
+            const late_fee = (i === YUVO_INDEX && current_day >= deb_guin.teachers[i].late_fee_days) ? calculateYuvoLateFee(due_months) : 0;
+            html += `${deb_guin.teachers[i].name} (${deb_guin.teachers[i].subject}): ${due_months} months + Late Rs.${late_fee} = Rs.${due_amount}<br>`;
+            total_due += due_amount;
+        }
+    }
+    if (total_due === 0) html += "✅ No pending payments!<br>";
+    html += `<br>💰 TOTAL DUE: Rs.${total_due}<br>💳 Total Paid so far: Rs.${deb_guin.total_paid}`;
+    document.getElementById('output').innerHTML = html;
+}
+
+// Show status
 function showStatus() {
-  let html = "<h3>Status</h3>";
-  deb_guin.teachers.forEach(t => {
-    const dm = monthsDue(t.last_paid_month, t.last_paid_year);
-    html += `<strong>${t.name} (${t.subject})</strong> Rs.${t.monthly_fee}/mo<br>`;
-    html += t.last_paid_month ? `Last: ${getMonthName(t.last_paid_month)} ${t.last_paid_year}<br>` : "Never paid<br>";
-    html += dm > 0 ? `Due: ${dm} mo Rs.${calculateTotalDue(deb_guin.teachers.indexOf(t))}<br>` : "Up to date<br><br>";
-  });
-  html += `Total Paid: Rs.${deb_guin.total_paid}`;
-  document.getElementById('output').innerHTML = html;
+    let html = "<h3>Current Status:</h3>";
+    for (let i = 0; i < NUM_TEACHERS; i++) {
+        const due_months = monthsDue(deb_guin.teachers[i].last_paid_month, deb_guin.teachers[i].last_paid_year);
+        html += `${deb_guin.teachers[i].name} (${deb_guin.teachers[i].subject}) - Rs.${deb_guin.teachers[i].monthly_fee}/month:<br>`;
+        if (deb_guin.teachers[i].last_paid_month > 0) {
+            const dayStr =        if (deb_guin.teachers[i].last_paid_month > 0) {
+            const dayStr = deb_guin.teachers[i].last_paid_day > 0 ? `${deb_guin.teachers[i].last_paid_day} ` : "";
+            html += `   Last Paid: ${dayStr}${getMonthName(deb_guin.teachers[i].last_paid_month)} ${deb_guin.teachers[i].last_paid_year} | Due: ${due_months} months Rs.${total_due}<br>`;
+        } else {
+            html += `   Not yet paid | Due: ${due_months} months Rs.${total_due}<br>`;
+        }
+        grand_total += total_due;
+    }
+    document.getElementById('teachers-list').innerHTML = html;
+    document.getElementById('grand-total').innerHTML = `💰 GRAND TOTAL DUE TODAY: Rs.${grand_total}`;
+    document.getElementById('total-paid').innerHTML = `💳 TOTAL PAID SO FAR: Rs.${deb_guin.total_paid}`;
 }
 
+// Register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then((registration) => console.log('Service Worker registered'))
+    .catch((error) => console.log('Service Worker registration failed'));
+}
+
+// Mark payment
+function markPayment() {
+    const teacher_idx = parseInt(prompt("Select teacher (1-7):")) - 1;
+    if (teacher_idx < 0 || teacher_idx >= NUM_TEACHERS) {
+        alert("Invalid teacher!");
+        return;
+    }
+    const months_to_pay = parseInt(prompt(`How many months for ${deb_guin.teachers[teacher_idx].name}:`));
+    if (months_to_pay <= 0) {
+        alert("Invalid number of months!");
+        return;
+    }
+    const amount = months_to_pay * deb_guin.teachers[teacher_idx].monthly_fee;
+    let new_month = deb_guin.teachers[teacher_idx].last_paid_month + months_to_pay;
+    let new_year = deb_guin.teachers[teacher_idx].last_paid_year;
+    while (new_month > 12) {
+        new_month -= 12;
+        new_year++;
+    }
+    // Record payment
+    if (deb_guin.teachers[teacher_idx].num_payments < MAX_PAYMENTS) {
+        deb_guin.teachers[teacher_idx].payments.push({
+            day: current_day,
+            month: current_month,
+            year: current_year,
+            amount: amount
+        });
+        deb_guin.teachers[teacher_idx].num_payments++;
+    }
+    deb_guin.teachers[teacher_idx].last_paid_day = current_day;
+    deb_guin.teachers[teacher_idx].last_paid_month = new_month;
+    deb_guin.teachers[teacher_idx].last_paid_year = new_year;
+    deb_guin.total_paid += amount;
+    alert(`Payment Recorded! Paid ${months_to_pay} months = Rs.${amount}. Now paid until ${getMonthName(new_month)} ${new_year}.`);
+    saveData();
+    displayMenu();
+}
+
+// Show dues
+function showDues() {
+    let html = "<h3>Pending Payments:</h3>";
+    let total_due = 0;
+    for (let i = 0; i < NUM_TEACHERS; i++) {
+        const due_months = monthsDue(deb_guin.teachers[i].last_paid_month, deb_guin.teachers[i].last_paid_year);
+        if (due_months > 0) {
+            const due_amount = calculateTotalDue(i);
+            const late_fee = (i === YUVO_INDEX && current_day >= deb_guin.teachers[i].late_fee_days) ? calculateYuvoLateFee(due_months) : 0;
+            html += `${deb_guin.teachers[i].name} (${deb_guin.teachers[i].subject}): ${due_months} months + Late Rs.${late_fee} = Rs.${due_amount}<br>`;
+            total_due += due_amount;
+        }
+    }
+    if (total_due === 0) html += "✅ No pending payments!<br>";
+    html += `<br>💰 TOTAL DUE: Rs.${total_due}<br>💳 Total Paid so far: Rs.${deb_guin.total_paid}`;
+    document.getElementById('output').innerHTML = html;
+}
+
+// Show status
+function showStatus() {
+    let html = "<h3>Current Status:</h3>";
+    for (let i = 0; i < NUM_TEACHERS; i++) {
+        const due_months = monthsDue(deb_guin.teachers[i].last_paid_month, deb_guin.teachers[i].last_paid_year);
+        html += `${deb_guin.teachers[i].name} (${deb_guin.teachers[i].subject}) - Rs.${deb_guin.teachers[i].monthly_fee}/month:<br>`;
+        if (deb_guin.teachers[i].last_paid_month > 0) {
+            const dayStr = deb_guin.teachers[i].last_paid_day > 0 ? `${deb_guin.teachers[i].last_paid_day} ` : "";
+            html += `   ✅ Last Paid: ${dayStr}${getMonthName(deb_guin.teachers[i].last_paid_month)} ${deb_guin.teachers[i].last_paid_year}<br>`;
+        } else {
+            html += "   ⚠️ Never paid<br>";
+        }
+        if (due_months > 0) {
+            const total_due = calculateTotalDue(i);
+            const late_fee = (i === YUVO_INDEX && current_day >= deb_guin.teachers[i].late_fee_days) ? calculateYuvoLateFee(due_months) : 0;
+            html += `   ❌ Due: ${due_months} months + Late Rs.${late_fee} = Rs.${total_due}<br>`;
+        } else {
+            html += "   ✅ Up to date!<br>";
+        }
+        html += "<br>";
+    }
+    html += `💳 Total Amount Paid: Rs.${deb_guin.total_paid}`;
+    document.getElementById('output').innerHTML = html;
+}
+
+// Show payment history
 function showHistory() {
-  let html = "<h3>Payment History</h3>";
-  deb_guin.teachers.forEach(t => {
-    html += `<strong>${t.name}:</strong><br>`;
-    if (!t.payments?.length) html += "No payments<br>";
-    else t.payments.forEach(p => {
-      html += `${p.day} ${getMonthName(p.month)} ${p.year}: Rs.${p.amount}<br>`;
-    });
-    html += "<br>";
-  });
-  document.getElementById('output').innerHTML = html;
+    let html = "<h3>Payment History:</h3>";
+    for (let i = 0; i < NUM_TEACHERS; i++) {
+        html += `<strong>${deb_guin.teachers[i].name}:</strong><br>`;
+        if (deb_guin.teachers[i].num_payments === 0) {
+            html += "   No payments recorded.<br>";
+        } else {
+            deb_guin.teachers[i].payments.forEach(p => {
+                html += `   ${p.day} ${getMonthName(p.month)} ${p.year}: Rs.${p.amount}<br>`;
+            });
+        }
+        html += "<br>";
+    }
+    document.getElementById('output').innerHTML = html;
 }
 
-async function saveData() {
-  const db = await openDB();
-  const tx = db.transaction(STORE_NAME, 'readwrite');
-  tx.objectStore(STORE_NAME).put(deb_guin, 'data');
-  // Export JSON backup
-  const blob = new Blob([JSON.stringify(deb_guin, null, 2)], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `fees-backup-${new Date().toISOString().split('T')[0]}.json`; a.click();
+// Save data to localStorage
+function saveData() {
+    localStorage.setItem('deb_guin_data', JSON.stringify(deb_guin));
+    alert("Data saved!");
 }
 
-async function loadData() {
-  try {
-    const db = await openDB();
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const data = await tx.objectStore(STORE_NAME).get('data');
-    if (data) deb_guin = data;
-    else initDefaultData();
-  } catch (e) {
-    initDefaultData();
-  }
-  displayMenu();
+// Load data from localStorage
+function loadData() {
+    const data = localStorage.getItem('deb_guin_data');
+    if (data) {
+        deb_guin = JSON.parse(data);
+    } else {
+        initDefaultData();
+    }
 }
 
+// Exit app
 function exitApp() {
-  if (confirm("Save & exit?")) saveData().then(() => alert("Goodbye!"));
+    if (confirm("Save and exit?")) {
+        saveData();
+        alert("Thank you Deb Guin!");
+    }
 }
 
-// Init
-(async () => {
-  await loadData();
-  updateSystemDate();
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
-})();
+// Initialize
+loadData();
+updateSystemDate();
+displayMenu();
