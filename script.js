@@ -84,6 +84,28 @@ function calculateTotalDue(teacher_idx) {
     }
     return total_due;
 }
+async function requestPersistentStorage() {
+  if (navigator.storage && navigator.storage.persist) {
+    const isPersisted = await navigator.storage.persisted();
+    if (!isPersisted) {
+      try {
+        const granted = await navigator.storage.persist();
+        console.log("Persistent storage granted:", granted);
+        if (granted) {
+          alert("Storage permission granted! Your data should now persist better.");
+        } else {
+          alert("Persistent storage denied. Data may be cleared by the browser under low space.");
+        }
+      } catch (err) {
+        console.error("Persistent storage error:", err);
+      }
+    } else {
+      console.log("Already have persistent storage.");
+    }
+  } else {
+    console.log("Persistent storage API not supported.");
+  }
+}
 
 // Display menu
 function displayMenu() {
@@ -315,7 +337,7 @@ function exitApp() {
     console.error("loadData failed:", err);
     initDefaultData();           // ← force defaults on any error
   }
-
+requestPersistentStorage()
   try {
     updateSystemDate();
     displayMenu();               // ← call again explicitly after date
