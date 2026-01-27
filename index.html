@@ -1,35 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tuition Fee Manager</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deb Guin's Tuition Fee Manager</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+  <meta name="theme-color" content="#007bff">
 </head>
 <body>
-    <div class="container">
-        <h1>TUITION FEE MANAGER</h1>
-        <div id="date-display"></div>
-        
-        <div id="menu">
-            <h2>My Teachers Status:</h2>
-            <div id="teachers-list"></div>
-            <div id="grand-total"></div>
-            <div id="total-paid"></div>
-            
-            <h2>Menu:</h2>
-<button onclick="markPayment()">1. Mark Payment</button>
-<button onclick="showDues()">2. See My Dues</button>
-<button onclick="showStatus()">3. Current Status</button>
-<button onclick="showHistory()">4. Payment History</button>
-<button onclick="importData()">5. Import Backup</button>
-<button onclick="saveData()">6. Save & Export</button>
-<button onclick="exitApp()">7. Exit</button>
-        </div>
-        
-        <div id="output"></div>
-    </div>
-    <script src="script.js"></script>
+  <div class="container">
+    <h1>TUITION FEE MANAGER</h1>
+    <div id="date-display"></div>
+
+    <h2>My Teachers Status:</h2>
+    <div id="teachers-list"></div>
+    <div id="grand-total"></div>
+    <div id="total-paid"></div>
+
+    <h2>Menu:</h2>
+    <button onclick="markPayment()">1. Mark Payment</button>
+    <button onclick="showDues()">2. See My Dues</button>
+    <button onclick="showStatus()">3. Current Status</button>
+    <button onclick="showHistory()">4. Payment History</button>
+    <button onclick="saveData()">5. Save & Export</button>
+    <button onclick="exitApp()">6. Exit</button>
+
+    <div id="output"></div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
