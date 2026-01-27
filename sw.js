@@ -1,8 +1,8 @@
-/const CACHE_NAME = 'fee-manager-v3';  // Updated version
+/const CACHE_NAME = 'fee-manager-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/offline.html',  // Added offline page
+  '/offline.html',
   '/styles.css',
   '/script.js',
   '/manifest.json',
