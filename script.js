@@ -93,6 +93,10 @@ function displayMenu() {
         const due_months = monthsDue(deb_guin.teachers[i].last_paid_month, deb_guin.teachers[i].last_paid_year);
         const total_due = calculateTotalDue(i);
         html += `${i+1}. <strong>${deb_guin.teachers[i].name}</strong> (${deb_guin.teachers[i].subject}) Rs.${deb_guin.teachers[i].monthly_fee}/month<br>`;
+        if (!deb_guin.teachers || deb_guin.teachers.length === 0) {
+    html = "<strong style='color: orange;'>No teachers loaded! Using fallback defaults.</strong><br><br>";
+    initDefaultData(); // emergency
+        }
         if (deb_guin.teachers[i].last_paid_month > 0) {
             const dayStr = deb_guin.teachers[i].last_paid_day > 0 ? `${deb_guin.teachers[i].last_paid_day} ` : "";
             html += `   Last Paid: ${dayStr}${getMonthName(deb_guin.teachers[i].last_paid_month)} ${deb_guin.teachers[i].last_paid_year} | Due: ${due_months} months Rs.${total_due}<br>`;
@@ -265,28 +269,33 @@ async function saveData() {
   }
 }
 
-// Load data
 async function loadData() {
   try {
     const db = await openDB();
     const transaction = db.transaction([STORE_NAME], 'readonly');
     const store = transaction.objectStore(STORE_NAME);
     const request = store.get('appData');
-    request.onsuccess = () => {
-      if (request.result) {
-        deb_guin = request.result;
-      } else {
+
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => {
+        if (request.result) {
+          deb_guin = request.result;
+          console.log("Loaded from IndexedDB:", deb_guin.teachers.length, "teachers");
+        } else {
+          console.log("No saved data → using defaults");
+          initDefaultData();
+        }
+        resolve();
+      };
+      request.onerror = () => {
+        console.error("IndexedDB get error:", request.error);
         initDefaultData();
-      }
-      displayMenu();
-    };
-    request.onerror = () => {
-      initDefaultData();
-      displayMenu();
-    };
+        resolve();           // continue anyway
+      };
+    });
   } catch (e) {
+    console.error("openDB / load failed:", e);
     initDefaultData();
-    displayMenu();
   }
 }
 
@@ -300,12 +309,22 @@ function exitApp() {
 
 // Initialize
 (async () => {
-  await loadData();
-  updateSystemDate();
-  // Register service worker
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log('Service Worker registered'))
-      .catch((error) => console.log('Service Worker registration failed:', error));
+  try {
+    await loadData();
+  } catch (err) {
+    console.error("loadData failed:", err);
+    initDefaultData();           // ← force defaults on any error
   }
+
+  try {
+    updateSystemDate();
+    displayMenu();               // ← call again explicitly after date
+    console.log("Teachers after displayMenu:", deb_guin.teachers.length);
+  } catch (err) {
+    console.error("Init failed:", err);
+    document.getElementById('teachers-list').innerHTML = 
+      "<strong style='color:red'>Error loading data. Using defaults. Check console.</strong>";
+  }
+
+  // Service worker registration...
 })();
