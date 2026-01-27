@@ -87,14 +87,23 @@ function displayMenu() {
     document.getElementById('total-paid').innerHTML = `💳 TOTAL PAID SO FAR: Rs.${deb_guin.total_paid}`;
 }
 
-// Mark payment (with auto-save)
+
+// Mark payment (with auto-save and cancel support)
 function markPayment() {
     const teacher_idx = parseInt(prompt("Select teacher (1-7):")) - 1;
+    if (teacher_idx === null || teacher_idx === undefined) {
+        alert("Payment canceled.");
+        return; // Cancel if user clicks cancel
+    }
     if (teacher_idx < 0 || teacher_idx >= NUM_TEACHERS) {
         alert("Invalid teacher!");
         return;
     }
     const months_to_pay = parseInt(prompt(`How many months for ${deb_guin.teachers[teacher_idx].name}:`));
+    if (months_to_pay === null || months_to_pay === undefined) {
+        alert("Payment canceled.");
+        return; // Cancel if user clicks cancel
+    }
     if (months_to_pay <= 0) {
         alert("Invalid number of months!");
         return;
@@ -124,7 +133,6 @@ function markPayment() {
     saveData();  // Auto-save after payment
     displayMenu();
 }
-
 // Show dues
 function showDues() {
     let html = "<h3>Pending Payments:</h3>";
