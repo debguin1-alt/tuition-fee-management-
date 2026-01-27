@@ -87,14 +87,23 @@ function displayMenu() {
     document.getElementById('total-paid').innerHTML = `💳 TOTAL PAID SO FAR: Rs.${deb_guin.total_paid}`;
 }
 
-// Mark payment (with auto-save)
+
+// Mark payment (with auto-save and cancel support)
 function markPayment() {
     const teacher_idx = parseInt(prompt("Select teacher (1-7):")) - 1;
+    if (teacher_idx === null || teacher_idx === undefined) {
+        alert("Payment canceled.");
+        return; // Cancel if user clicks cancel
+    }
     if (teacher_idx < 0 || teacher_idx >= NUM_TEACHERS) {
         alert("Invalid teacher!");
         return;
     }
     const months_to_pay = parseInt(prompt(`How many months for ${deb_guin.teachers[teacher_idx].name}:`));
+    if (months_to_pay === null || months_to_pay === undefined) {
+        alert("Payment canceled.");
+        return; // Cancel if user clicks cancel
+    }
     if (months_to_pay <= 0) {
         alert("Invalid number of months!");
         return;
@@ -124,7 +133,6 @@ function markPayment() {
     saveData();  // Auto-save after payment
     displayMenu();
 }
-
 // Show dues
 function showDues() {
     let html = "<h3>Pending Payments:</h3>";
@@ -232,95 +240,4 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
         .then(() => console.log('Service Worker registered'))
         .catch((error) => console.log('Service Worker registration failed:', error));
-} saveData();
-    displayMenu();
-}
-
-// Show dues
-function showDues() {
-    let html = "<h3>Pending Payments:</h3>";
-    let total_due = 0;
-    for (let i = 0; i < NUM_TEACHERS; i++) {
-        const due_months = monthsDue(deb_guin.teachers[i].last_paid_month, deb_guin.teachers[i].last_paid_year);
-        if (due_months > 0) {
-            const due_amount = calculateTotalDue(i);
-            const late_fee = (i === YUVO_INDEX && current_day >= deb_guin.teachers[i].late_fee_days) ? calculateYuvoLateFee(due_months) : 0;
-            html += `${deb_guin.teachers[i].name} (${deb_guin.teachers[i].subject}): ${due_months} months + Late Rs.${late_fee} = Rs.${due_amount}<br>`;
-            total_due += due_amount;
         }
-    }
-    if (total_due === 0) html += "✅ No pending payments!<br>";
-    html += `<br>💰 TOTAL DUE: Rs.${total_due}<br>💳 Total Paid so far: Rs.${deb_guin.total_paid}`;
-    document.getElementById('output').innerHTML = html;
-}
-
-// Show status
-function showStatus() {
-    let html = "<h3>Current Status:</h3>";
-    for (let i = 0; i < NUM_TEACHERS; i++) {
-        const due_months = monthsDue(deb_guin.teachers[i].last_paid_month, deb_guin.teachers[i].last_paid_year);
-        html += `${deb_guin.teachers[i].name} (${deb_guin.teachers[i].subject}) - Rs.${deb_guin.teachers[i].monthly_fee}/month:<br>`;
-        if (deb_guin.teachers[i].last_paid_month > 0) {
-            const dayStr = deb_guin.teachers[i].last_paid_day > 0 ? `${deb_guin.teachers[i].last_paid_day} ` : "";
-            html += `   ✅ Last Paid: ${dayStr}${getMonthName(deb_guin.teachers[i].last_paid_month)} ${deb_guin.teachers[i].last_paid_year}<br>`;
-        } else {
-            html += "   ⚠️ Never paid<br>";
-        }
-        if (due_months > 0) {
-            const total_due = calculateTotalDue(i);
-            const late_fee = (i === YUVO_INDEX && current_day >= deb_guin.teachers[i].late_fee_days) ? calculateYuvoLateFee(due_months) : 0;
-            html += `   ❌ Due: ${due_months} months + Late Rs.${late_fee} = Rs.${total_due}<br>`;
-        } else {
-            html += "   ✅ Up to date!<br>";
-        }
-        html += "<br>";
-    }
-    html += `💳 Total Amount Paid: Rs.${deb_guin.total_paid}`;
-    document.getElementById('output').innerHTML = html;
-}
-
-// Show payment history
-function showHistory() {
-    let html = "<h3>Payment History:</h3>";
-    for (let i = 0; i < NUM_TEACHERS; i++) {
-        html += `<strong>${deb_guin.teachers[i].name}:</strong><br>`;
-        if (deb_guin.teachers[i].num_payments === 0) {
-            html += "   No payments recorded.<br>";
-        } else {
-            deb_guin.teachers[i].payments.forEach(p => {
-                html += `   ${p.day} ${getMonthName(p.month)} ${p.year}: Rs.${p.amount}<br>`;
-            });
-        }
-        html += "<br>";
-    }
-    document.getElementById('output').innerHTML = html;
-}
-
-// Save data to localStorage
-function saveData() {
-    localStorage.setItem('deb_guin_data', JSON.stringify(deb_guin));
-    alert("Data saved!");
-}
-
-// Load data from localStorage
-function loadData() {
-    const data = localStorage.getItem('deb_guin_data');
-    if (data) {
-        deb_guin = JSON.parse(data);
-    } else {
-        initDefaultData();
-    }
-}
-
-// Exit app
-function exitApp() {
-    if (confirm("Save and exit?")) {
-        saveData();
-        alert("Thank you Deb Guin!");
-    }
-}
-
-// Initialize
-loadData();
-updateSystemDate();
-displayMenu();
