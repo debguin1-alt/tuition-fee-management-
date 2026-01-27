@@ -376,6 +376,7 @@ function exitApp() {
   await importData();
   updateSystemDate();
   displayMenu();
+  initDefaultData();  
   // Register service worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js')
