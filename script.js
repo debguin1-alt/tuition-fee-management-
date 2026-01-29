@@ -220,7 +220,7 @@ function importData() {
         try {
           const importedData = JSON.parse(e.target.result);
           deb_guin = importedData;
-          saveData();
+          //saveData();
           displayMenu();
           alert("Data imported!");
         } catch (err) {
@@ -270,7 +270,7 @@ function exitApp() {
 }
 
 // Initialize
-loadData();
+initDefaultData();
 updateSystemDate();
 
 // Register service worker
