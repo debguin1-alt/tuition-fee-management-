@@ -16,7 +16,7 @@ function initDefaultData() {
         { name: "Snigdhadeep sir", subject: "Math", monthly_fee: 500, last_paid_day: 0, last_paid_month: 7, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [], num_payments: 0 },
         { name: "Prasun sir", subject: "Chemistry", monthly_fee: 500, last_paid_day: 0, last_paid_month: 7, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [], num_payments: 0 },
         { name: "Sumit sir", subject: "English", monthly_fee: 400, last_paid_day: 0, last_paid_month: 7, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [], num_payments: 0 },
-        { name: "Debabrata sir", subject: "Bengali", monthly_fee: 300, last_paid_day: 0, last_paid_month: 6, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [], num_payments: 0 },
+        { name: "Debabrata sir", subject: "Bengali", monthly_fee: 350, last_paid_day: 0, last_paid_month: 6, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [], num_payments: 0 },
         { name: "Yuvo Comp. Centre", subject: "DDTA", monthly_fee: 700, last_paid_day: 0, last_paid_month: 12, last_paid_year: 2025, late_fee_days: 20, late_fee_amount: 2, payments: [], num_payments: 0 },
         { name: "Mridul sir", subject: "COMA", monthly_fee: 400, last_paid_day: 0, last_paid_month: 8, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [], num_payments: 0 },
         { name: "Arpan sir", subject: "Physics", monthly_fee: 500, last_paid_day: 0, last_paid_month: 8, last_paid_year: 2025, late_fee_days: 0, late_fee_amount: 0, payments: [], num_payments: 0 },
