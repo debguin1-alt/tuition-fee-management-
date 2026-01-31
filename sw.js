@@ -1,11 +1,11 @@
 const CACHE_NAME = "fee-manager-v1";
 
 const APP_SHELL = [
-  "/",
-  "/index.html",
-  "/style.css",
-  "/script.js",
-  "/manifest.json"
+  "./",
+  "./index.html",
+  "./style.css",
+  "./script.js",
+  "./manifest.json"
 ];
 
 /* ---------- INSTALL ---------- */
