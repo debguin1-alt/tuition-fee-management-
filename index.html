@@ -1,36 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Deb Guin's Tuition Fee Manager</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tuition Fee Manager</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="container">
-        <h1>TUITION FEE MANAGER</h1>
-        <div id="date-display"></div>
-        
-        <div id="menu">
-            <h2>My Teachers Status:</h2>
-            <div id="teachers-list"></div>
-            <div id="grand-total"></div>
-            <div id="total-paid"></div>
-            
-            <h2>Menu:</h2>
-            <button onclick="markPayment()"> Mark Payment</button>
-            <button onclick="showDues()"> See My Dues</button>
-            <button onclick="showStatus()"> Current Status</button>
-            <button onclick="showHistory()"> Payment History</button>
-            <button onclick="saveData()"> Save</button>
-            <button onclick="exportData()">Export Data to File</button>
-            <button onclick="importData()">Import Data from File</button>
-            <button onclick="exitApp()"> Exit</button>
-        </div>
-        
-        <div id="output"></div>
-    </div>
-    <script src="script.js"></script>
+
+  <h1>Tuition Fee Manager</h1>
+
+<div id="date-display" class="card"></div>
+
+<div id="teachers-list" class="card"></div>
+
+<div id="grand-total" class="card total"></div>
+
+<div class="menu">
+  <button onclick="markPayment()">Mark Payment</button>
+  <button onclick="showStatus()">Current Status</button>
+  <button onclick="showHistory()">Payment History</button>
+  <button onclick="exportBackup()">Export Backup</button>
+  <button onclick="forceImport()">Restore from Backup</button>
+</div>
+
+<div id="output" class="card"></div>
+  <script src="script.js"></script>
 </body>
 </html>
