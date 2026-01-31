@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tuition Fee Manager</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <h1>Tuition Fee Manager</h1>
+
+<div id="date-display" class="card"></div>
+
+<div id="teachers-list" class="card"></div>
+
+<div id="grand-total" class="card total"></div>
+
+<div class="menu">
+  <button onclick="markPayment()">Mark Payment</button>
+  <button onclick="showStatus()">Current Status</button>
+  <button onclick="showHistory()">Payment History</button>
+  <button onclick="exportBackup()">Export Backup</button>
+  <button onclick="forceImport()">Restore from Backup</button>
+</div>
+
+<div id="output" class="card"></div>
+  <script src="script.js"></script>
+</body>
+</html>
