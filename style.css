@@ -3,6 +3,10 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 body {
@@ -12,6 +16,8 @@ body {
     padding: 15px;
     color: #333;
     line-height: 1.6;
+    touch-action: pan-y;
+    -webkit-touch-callout: none;
 }
 
 /* Card Styles */
